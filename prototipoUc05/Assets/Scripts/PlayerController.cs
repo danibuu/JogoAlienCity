@@ -11,6 +11,14 @@ public class PlayerController : MonoBehaviour {
 	public Transform posPe;
 	[HideInInspector] public bool tocaChao = false;
 	[HideInInspector] public bool jump;
+	[HideInInspector] public bool atirar_parado;
+	[HideInInspector] public bool correr_com_arma;
+
+
+	private float shootingRate = 0.1f;
+	public float shootCooldown = 0f;
+	public Transform spawBullet;
+	public GameObject bullet;
 
 	public float Velocidade;
 	public float ForcaPulo = 1000f;
@@ -32,9 +40,25 @@ public class PlayerController : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {		
 		tocaChao = Physics2D.Linecast (transform.position, posPe.position, 1 << LayerMask.NameToLayer ("chao"));
-		if((Input.GetKeyDown ("space")&& (tocaChao)))
+		if((Input.GetKeyDown (KeyCode.Space)&& (tocaChao)))
 		{
 			jump = true;
+		}
+		if((Input.GetKeyDown (KeyCode.F) && (tocaChao)))
+		{
+			atirar_parado = true;
+		}
+
+		//se eu já atirei alguma vez, esta variavel esta maior que zero
+		if(shootCooldown > 0)
+		{
+			shootCooldown -= Time.deltaTime;
+		}
+		//aperte a letra F para dar o tiro
+		if((Input.GetKeyDown (KeyCode.F)))
+		{
+			Fire ();
+			shootCooldown = shootingRate;
 		}
 	}
 
@@ -57,6 +81,24 @@ public class PlayerController : MonoBehaviour {
 			jump = false;
 		}
 
+		//Programar tiro parado e correr com arma! 
+		if (atirar_parado) {
+			if (translationX != 0 && tocaChao) {
+				anim.SetTrigger ("correr_com_arma");
+			} else {
+				anim.SetTrigger ("atirar_parado");
+				atirar_parado = false;
+			}
+		}
+
+		//Programar correr com arma Aqui! 
+		/*if (correr_com_arma) {
+			anim.SetTrigger ("correr_com_arma");
+			correr_com_arma = false;
+		}*/
+		//Programar tiro com arma Aqui! 
+
+
 
 
 		if (translationX > 0 && !viradoDireita) {
@@ -66,6 +108,34 @@ public class PlayerController : MonoBehaviour {
 		}
 
 	}
+
+	//função do tiro
+	void Fire(){
+		//atirar somente se o shootCooldown <= 0f
+		if(shootCooldown <= 0f)
+		{
+			if(bullet != null)
+			{
+				var cloneBullet = Instantiate (bullet, spawBullet.position, Quaternion.identity) as GameObject;
+				cloneBullet.transform.localScale = this.transform.localScale;
+				//som de tiro do player
+				SoundEffectScript.Instance.MakeEnemyShotSound ();
+			}
+		
+		}
+
+	}
+
+	//colisao com agua
+	void OnTriggerEnter2D(Collider2D col)
+	{
+		if(col.tag == "agua")
+		{
+			Destroy (gameObject);
+			Application.LoadLevel ("Cena1");
+		}
+	}
+
 	void Flip()
 	{
 		viradoDireita = !viradoDireita;
