@@ -19,6 +19,7 @@ public class PlayerController : MonoBehaviour {
 	public float shootCooldown = 0f;
 	public Transform spawBullet;
 	public GameObject bullet;
+	public GameObject bullet2;
 
 	public float Velocidade;
 	public float ForcaPulo = 1000f;
@@ -26,6 +27,13 @@ public class PlayerController : MonoBehaviour {
 
 	public Image vida;
 	private MensagemControle MC;
+	public GUIText textoMensagem;
+
+	//Imagens para tiro 1 e 2.
+	public Image imagemTiro1;
+	public Image imagemTiro2;
+
+
 
 	void Start () {
 		anim = GetComponent<Animator> ();
@@ -35,6 +43,14 @@ public class PlayerController : MonoBehaviour {
 		if (mensagemControleObject != null) {
 			MC = mensagemControleObject.GetComponent<MensagemControle> ();
 		}
+
+		bullet.gameObject.SetActive(true);
+		bullet2.gameObject.SetActive(false);
+
+		//imagemTiro1.enabled = true;
+		//imagemTiro2.enabled = false;
+
+
 	}
 
 	// Update is called once per frame
@@ -43,6 +59,16 @@ public class PlayerController : MonoBehaviour {
 		if((Input.GetKeyDown (KeyCode.Space)&& (tocaChao)))
 		{
 			jump = true;
+		}
+		if (Input.GetKeyDown("1")){
+			bullet.gameObject.SetActive(true);
+			bullet2.gameObject.SetActive(false);
+					
+		}
+		if (Input.GetKeyDown("2")){
+			bullet.gameObject.SetActive(false);
+			bullet2.gameObject.SetActive(true);
+
 		}
 		if((Input.GetKeyDown (KeyCode.F) && (tocaChao)))
 		{
@@ -91,15 +117,6 @@ public class PlayerController : MonoBehaviour {
 			}
 		}
 
-		//Programar correr com arma Aqui! 
-		/*if (correr_com_arma) {
-			anim.SetTrigger ("correr_com_arma");
-			correr_com_arma = false;
-		}*/
-		//Programar tiro com arma Aqui! 
-
-
-
 
 		if (translationX > 0 && !viradoDireita) {
 			Flip ();
@@ -121,7 +138,14 @@ public class PlayerController : MonoBehaviour {
 				//som de tiro do player
 				SoundEffectScript.Instance.MakeEnemyShotSound ();
 			}
-		
+			if(bullet2 != null)
+			{
+				var cloneBullet = Instantiate (bullet2, spawBullet.position, Quaternion.identity) as GameObject;
+				cloneBullet.transform.localScale = this.transform.localScale;
+				//som de tiro do player
+				SoundEffectScript.Instance.MakeEnemyShotSound ();
+			}
+
 		}
 
 	}
